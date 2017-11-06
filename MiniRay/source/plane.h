@@ -2,6 +2,7 @@
 
 #include "object.h"
 
+
 class Plane : public Object {
 protected:
 	Vector3d position;

@@ -5,8 +5,8 @@
 #include <string>
 #include <cmath>
 
-#define INFTY 999999999
-#define EPSILON 0.0000001
+constexpr long   INFTY   = 999999999;
+constexpr double EPSILON = 0.0000001;
 
 typedef struct Color
 {

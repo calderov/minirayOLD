@@ -2,6 +2,8 @@
 
 #include "typedefs.h"
 
+#include <vector>
+
 class Camera
 {
 public:
@@ -12,9 +14,6 @@ public:
 
 	// Screen pixels live here
 	std::vector<Pixel> screen;
-
-	// Camera plane segment coordinates (x0, y0, x1, y1)
-	std::vector<double> screen_rect;
 
 	// Camera position (space coordinates)
 	Vector3d position;
@@ -28,6 +27,10 @@ public:
 	void saveBMP(std::string filename);
 
 private:
+	// Camera plane segment coordinates (x0, y0, x1, y1)
+	std::vector<double> screen_rect;
+
 	void initializeScreenPixels();
-	unsigned char* getBMPData();
+	void cameraInit(int width, int height, Vector3d position);
+	std::vector<unsigned char> getBMPData();
 };

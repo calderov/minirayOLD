@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <iostream>
+#include <string>
+#include <cmath>
 #include "scene.h"
 
 using namespace std;
@@ -16,7 +18,8 @@ Color rgbColor(double r, double g, double b)
 int main(int argc, char const *argv[])
 {
 	// Set camera
-	Camera camera(1920, 1440, { 0, 0.35, -1 });
+	//Camera camera(1920, 1440, { 0, 0.35, -1 });
+	Camera camera;
 
 	// Set light
 	Light light;
@@ -42,10 +45,32 @@ int main(int argc, char const *argv[])
 	scene_objects.push_back(new Sphere({ -2.75, 0.10, 3.50 }, .6, rgbColor(45, 45, 192), 0.50));
 
 	cout << "Rendering Scene..." << endl;
-	Scene my_scene(camera, light, max_reflections, &scene_objects);
-	my_scene.render();
-	my_scene.saveBMP("OutputRender.bmp");
+
+	int total_frames = 240;
+	for (int i = 0; i < total_frames; i++)
+	{
+		// Print progress
+		//string filename = "renders/frame" + zeroPadInt(i) + ".bmp";
+		string filename = "renders/frame" + std::to_string(i) + ".bmp";
+		cout << "Frame " << i << "/" << total_frames << endl;
+
+		// Render scene
+		Scene my_scene(camera, light, max_reflections, &scene_objects);
+		my_scene.render();
+
+		// Save scene
+		my_scene.saveBMP(filename.c_str());
+
+		// Update light
+		light.position.x += sin(i * 0.2);
+	}
+
 	cout << "Done! Scene saved as OutputRender.bmp" << endl;
+
+	// Release the memory allocated to store the different objects of the scene
+	for (vector<Object*>::iterator it = scene_objects.begin(); it != scene_objects.end(); it++)
+		delete *it;
+	scene_objects.clear();
 
 	return 0;
 }

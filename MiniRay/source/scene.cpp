@@ -10,22 +10,17 @@
 #include "scene.h"
 
 // Scene Constructor
-Scene::Scene(Camera camera, Light light, int max_reflections, vector<Object*> *scene_objects)
+Scene::Scene(Camera camera, Light light, int max_reflections, vector<Object*>* scene_objects)
 {
-	_camera = camera;
-	_light = light;
-	_max_reflections = max_reflections;
-	_objects = *scene_objects;
+	this->camera = camera;
+	this->light = light;
+	this->max_reflections = max_reflections;
+	this->objects = *scene_objects;
 }
 
 // Scene Destructor
 Scene::~Scene()
-{
-	// Release the memory allocated to store the different objects of the scene
-	for (vector<Object*>::iterator it = _objects.begin(); it != _objects.end(); it++)
-		delete *it;
-	_objects.clear();
-}
+{}
 
 TraceResult Scene::traceRay(Vector3d rayO, Vector3d rayD, Light light)
 {
@@ -38,9 +33,9 @@ TraceResult Scene::traceRay(Vector3d rayO, Vector3d rayD, Light light)
 	double d = INFTY;
 
 	// Find distance to the nearest object in the path of the ray
-	for (size_t i = 0; i < _objects.size(); i++)
+	for (size_t i = 0; i < objects.size(); i++)
 	{
-		current_object = _objects[i];
+		current_object = objects[i];
 		double current_distance = current_object->intersect(rayO, rayD);
 		if (current_distance < d)
 		{
@@ -54,7 +49,7 @@ TraceResult Scene::traceRay(Vector3d rayO, Vector3d rayD, Light light)
 		return ray_hit;
 
 	// Select the nearest object
-	current_object = _objects[object_index];
+	current_object = objects[object_index];
 
 	// Find the point of intersection on the object
 	Vector3d M = rayO + rayD * d;
@@ -75,11 +70,11 @@ TraceResult Scene::traceRay(Vector3d rayO, Vector3d rayD, Light light)
 	ray_add.normalize();
 
 	// Return early if the point on the object is shadowed
-	for (size_t i = 0; i < _objects.size(); i++)
+	for (size_t i = 0; i < objects.size(); i++)
 	{
 		if (i != object_index)
 		{
-			bool in_shadow = _objects[i]->intersect(M + N * .0001, ray_to_L) < INFTY;
+			bool in_shadow = objects[i]->intersect(M + N * .0001, ray_to_L) < INFTY;
 			if (in_shadow)
 				return ray_hit;
 		}
@@ -110,7 +105,7 @@ void Scene::render()
 	// Return early if the  camera screen has no pixels to render.
 	// This can happen if the specified width or height for the 
 	// render resolution equals zero.
-	if (_camera.screen.size() == 0)
+	if (camera.screen.size() == 0)
 	{
 		return;
 	}
@@ -124,30 +119,30 @@ void Scene::render()
 	Vector3d rayD;
 
 	// Loop through all pixels in the screen
-	for (size_t i = 0; i < _camera.screen.size(); i++)
+	for (size_t i = 0; i < camera.screen.size(); i++)
 	{
 		// Get a pointer to the current pixel
-		current_pixel = &_camera.screen[i];
+		current_pixel = &camera.screen[i];
 
-		_camera.pointRayFromScreenCoord(current_pixel->x, current_pixel->y);
-		rayO = _camera.position;
-		rayD = _camera.rayTarget - _camera.position;
+		camera.pointRayFromScreenCoord(current_pixel->x, current_pixel->y);
+		rayO = camera.position;
+		rayD = camera.rayTarget - camera.position;
 		rayD.normalize();
 
 		reflection = 1;
 		reflection_depth = 0;
 
 		// Trace initial rays and reflections 
-		while (reflection_depth < _max_reflections)
+		while (reflection_depth < max_reflections)
 		{
 			// Trace ray
-			ray_hit = traceRay(rayO, rayD, _light);
+			ray_hit = traceRay(rayO, rayD, light);
 			if (!ray_hit.succeeded)
 				break;
 
 			// Update pixel color and reflection values
 			current_pixel->color = current_pixel->color + ray_hit.color * reflection;
-			reflection = reflection * _objects[ray_hit.object_index]->reflection;
+			reflection = reflection * objects[ray_hit.object_index]->reflection;
 			reflection_depth++;
 
 			// Reflect ray
@@ -165,5 +160,5 @@ void Scene::render()
 
 void Scene::saveBMP(string filename)
 {
-	_camera.saveBMP(filename);
+	camera.saveBMP(filename);
 }
